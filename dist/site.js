@@ -10,23 +10,64 @@ function filterProjects(category){
 filters.forEach(b=>b.addEventListener('click',()=>filterProjects(b.dataset.filter)));
 document.querySelectorAll('[data-filter-link]').forEach(a=>a.addEventListener('click',()=>filterProjects(a.dataset.filterLink)));
 const dialog=document.querySelector('#gallery-dialog');
+let galleryProject=null,galleryIndex=0;
+const galleryImage=document.querySelector('#gallery-image');
+const galleryError=document.querySelector('#gallery-error');
+const photoPath=n=>'assets/portfolio/resibat-'+String(n).padStart(3,'0')+'.jpg';
+function showGalleryPhoto(index){
+ if(!galleryProject)return;
+ galleryIndex=(index+galleryProject.photos.length)%galleryProject.photos.length;
+ galleryError.hidden=true;
+ galleryImage.src=photoPath(galleryProject.photos[galleryIndex]);
+ galleryImage.alt=galleryProject.title+' — vue '+(galleryIndex+1);
+ document.querySelector('#gallery-caption').textContent=galleryProject.title;
+ document.querySelector('#gallery-counter').textContent=String(galleryIndex+1).padStart(2,'0')+' / '+String(galleryProject.photos.length).padStart(2,'0');
+ document.querySelectorAll('[data-gallery-photo]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.galleryPhoto)===galleryIndex)));
+}
+galleryImage.addEventListener('error',()=>galleryError.hidden=false);
+galleryImage.addEventListener('load',()=>galleryError.hidden=true);
 document.querySelectorAll('[data-project]').forEach(b=>b.addEventListener('click',()=>{
- const p=projects[Number(b.dataset.project)];
+ galleryProject=projects[Number(b.dataset.project)];
+ const p=galleryProject;
  document.querySelector('#gallery-title').textContent=p.title;
  document.querySelector('#gallery-category').textContent=p.category;
  document.querySelector('#gallery-location').textContent=p.location+' · '+p.date;
  const photos=document.querySelector('#gallery-photos');photos.replaceChildren();
- p.photos.forEach((n,i)=>{const figure=document.createElement('figure'),image=document.createElement('img'),caption=document.createElement('figcaption');image.src='assets/portfolio/resibat-'+String(n).padStart(3,'0')+'.jpg';image.alt=p.title+' — vue '+(i+1);image.loading='lazy';caption.textContent=p.title+' · '+(i+1)+' / '+p.photos.length;figure.append(image,caption);photos.append(figure)});
- dialog.showModal();dialog.scrollTop=0;
+ p.photos.forEach((n,i)=>{
+  const button=document.createElement('button'),image=document.createElement('img');
+  button.type='button';button.dataset.galleryPhoto=String(i);button.setAttribute('aria-label','Afficher la photo '+(i+1)+' sur '+p.photos.length);
+  image.src=photoPath(n);image.alt='';image.loading='lazy';image.width=96;image.height=72;
+  button.append(image);button.addEventListener('click',()=>showGalleryPhoto(i));photos.append(button);
+ });
+ showGalleryPhoto(0);dialog.showModal();dialog.scrollTop=0;
 }));
+document.querySelector('#gallery-prev').addEventListener('click',()=>showGalleryPhoto(galleryIndex-1));
+document.querySelector('#gallery-next').addEventListener('click',()=>showGalleryPhoto(galleryIndex+1));
+dialog.addEventListener('keydown',e=>{
+ if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();showGalleryPhoto(galleryIndex+(e.key==='ArrowRight'?1:-1))}
+});
+let swipeStart=null;
+const galleryStage=document.querySelector('.gallery-stage');
+galleryStage.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')swipeStart={x:e.clientX,y:e.clientY}});
+galleryStage.addEventListener('pointerup',e=>{
+ if(!swipeStart)return;
+ const dx=e.clientX-swipeStart.x,dy=e.clientY-swipeStart.y;swipeStart=null;
+ if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.5)showGalleryPhoto(galleryIndex+(dx<0?1:-1));
+});
+galleryStage.addEventListener('pointercancel',()=>swipeStart=null);
 document.querySelector('#close-gallery').addEventListener('click',()=>dialog.close());
 dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close()}});
 const form=document.querySelector('#quote-form'),result=document.querySelector('#quote-result');
-form.addEventListener('input',()=>result.hidden=true);
+form.addEventListener('input',e=>{result.hidden=true;if(typeof e.target.setCustomValidity==='function')e.target.setCustomValidity('')});
+form.addEventListener('change',()=>result.hidden=true);
 form.addEventListener('submit',e=>{
  e.preventDefault();const data=new FormData(form);
  const name=String(data.get('name')).trim(),city=String(data.get('city')).trim(),details=String(data.get('details')).trim();
- if(!city||!details){form.querySelector(!city?'#city':'#details').focus();return}
- const message='Bonjour RESI-BAT,'+(name?' je suis '+name+'.':'')+'\nJe souhaite un devis pour : '+data.get('service')+'.\nLieu : '+city+'.\nMon projet : '+details;
+ if(!city||!details){const field=form.querySelector(!city?'#city':'#details');field.setCustomValidity(!city?'Indiquez la ville ou la commune du chantier.':'Décrivez votre projet en quelques mots.');field.reportValidity();return}
+ const message='Bonjour RESI-BAT,'+(name?' je suis '+name+'.':'')+'\nJe souhaite un devis pour : '+data.get('service')+'.\nLieu : '+city+'.\nMon projet : '+details+(form.dataset.inspiration?'\nInspiration : '+form.dataset.inspiration:'');
+ document.querySelector('#quote-preview').textContent=message;
  document.querySelector('#quote-link').href='https://wa.me/2250749123888?text='+encodeURIComponent(message);result.hidden=false;
 });
+
+menu.addEventListener('keydown',e=>{if(e.key==='Escape'){menu.open=false;menu.querySelector('summary').focus()}});
+document.addEventListener('click',e=>{if(menu.open&&!menu.contains(e.target))menu.open=false});
