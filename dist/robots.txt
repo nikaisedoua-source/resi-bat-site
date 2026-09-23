@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://atelier-peinture-interieurs.tchereeric6.chatgpt.site/sitemap.xml
