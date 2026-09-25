@@ -3,3 +3,9 @@ rsbt/
 **/._*
 .DS_Store
 output/
+
+# Local Netlify folder
+.netlify
+
+# Local Wrangler / Cloudflare folder
+.wrangler/
