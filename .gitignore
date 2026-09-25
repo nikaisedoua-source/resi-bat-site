@@ -1,3 +1,5 @@
 rsbt/
 ._*
+**/._*
 .DS_Store
+output/

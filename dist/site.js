@@ -2,11 +2,16 @@ const projects = [{"category": "Marmorino", "title": "Chambre aux nuances minér
 const menu=document.querySelector('.mobile-nav');
 menu.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>menu.open=false));
 const filters=[...document.querySelectorAll('[data-filter]')];
+let selectedCategory="Tout",selectedAudience="all";
+const professionalProjects=new Set([3,5,6,7,10,11]);
+const audienceFilters=[...document.querySelectorAll("[data-audience]")];
 function filterProjects(category){
+ selectedCategory=category;
  filters.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.filter===category)));
- let count=0;document.querySelectorAll('.project-card').forEach(card=>{card.hidden=category!=='Tout'&&card.dataset.category!==category;if(!card.hidden)count++});
+ let count=0;document.querySelectorAll('.project-card').forEach(card=>{const isProfessional=professionalProjects.has(Number(card.querySelector('[data-project]').dataset.project));card.hidden=(category!=='Tout'&&card.dataset.category!==category)||(selectedAudience==='professional'&&!isProfessional)||(selectedAudience==='residential'&&isProfessional);if(!card.hidden)count++});
  document.querySelector('.result-count').textContent=count+' chantier'+(count>1?'s':'')+' à découvrir';
 }
+audienceFilters.forEach(b=>b.addEventListener('click',()=>{selectedAudience=b.dataset.audience;audienceFilters.forEach(item=>item.setAttribute('aria-pressed',String(item===b)));filterProjects(selectedCategory)}));
 filters.forEach(b=>b.addEventListener('click',()=>filterProjects(b.dataset.filter)));
 document.querySelectorAll('[data-filter-link]').forEach(a=>a.addEventListener('click',()=>filterProjects(a.dataset.filterLink)));
 const dialog=document.querySelector('#gallery-dialog');
@@ -64,7 +69,7 @@ form.addEventListener('submit',e=>{
  e.preventDefault();const data=new FormData(form);
  const name=String(data.get('name')).trim(),city=String(data.get('city')).trim(),details=String(data.get('details')).trim();
  if(!city||!details){const field=form.querySelector(!city?'#city':'#details');field.setCustomValidity(!city?'Indiquez la ville ou la commune du chantier.':'Décrivez votre projet en quelques mots.');field.reportValidity();return}
- const message='Bonjour RESI-BAT,'+(name?' je suis '+name+'.':'')+'\nJe souhaite un devis pour : '+data.get('service')+'.\nLieu : '+city+'.\nMon projet : '+details+(form.dataset.inspiration?'\nInspiration : '+form.dataset.inspiration:'');
+ const message='Bonjour RESI-BAT,'+(name?' je suis '+name+'.':'')+'\nJe souhaite un devis pour : '+data.get('service')+'.\nLieu : '+city+'.'+(data.get('place')?'\nType de lieu : '+data.get('place')+'.':'')+(data.get('surface')?'\nSurface approximative : '+data.get('surface')+' m².':'')+'\nMon projet : '+details+(form.dataset.inspiration?'\nInspiration : '+form.dataset.inspiration:'');
  document.querySelector('#quote-preview').textContent=message;
  document.querySelector('#quote-link').href='https://wa.me/2250749123888?text='+encodeURIComponent(message);result.hidden=false;
 });

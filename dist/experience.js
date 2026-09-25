@@ -19,6 +19,7 @@
   {name:'Stucco effet marbre',file:'017',alt:'Décoration murale en stucco avec veinage effet marbre',tag:'VEINAGE & LUMIÈRE',heading:'Le mouvement de la pierre.',text:'Des veines dessinées, des nuances et des reflets. Le stucco effet marbre apporte une expression singulière aux intérieurs et aux espaces professionnels.',caption:'Particuliers · Yamoussoukro & Gabiadji · 2022'},
   {name:'Pietra Levigata',file:'043',alt:'Pietra Levigata dans un espace de la PISAM à Cocody',tag:'DOUCEUR & RELIEF',heading:'Une présence naturellement chaleureuse.',text:'Un enduit décoratif à l’aspect de pierre naturelle, pour les lieux de vie, les hôtels et les espaces d’accueil.',caption:'PISAM · Cocody · Avril 2025'}
  ];
+ const materialFacts=[['Minéral, nuancé, satiné','Chambres, salons, espaces de vie'],['Continu, contemporain, texturé','Murs, salles d’eau, escaliers'],['Veiné, marbré, lumineux','Intérieurs, bureaux, showrooms'],['Pierre naturelle, douce, chaleureuse','Lieux de vie, hôtels, espaces d’accueil']];
  let selectedMaterial=0,materialRequest=0;
  const plane=document.querySelector('#sample-plane'),photo=document.querySelector('#sample-photo'),detail=document.querySelector('#detail-photo'),range=document.querySelector('#detail-range');
  const materialButtons=[...document.querySelectorAll('[data-material]')];
@@ -29,7 +30,7 @@
   const preload=new Image();preload.src=src;
   try{await preload.decode()}catch{if(request!==materialRequest)return;document.querySelector('#lab-description').textContent='Cette photographie est momentanément indisponible. Retrouvez les réalisations dans le portfolio.';return}
   if(request!==materialRequest)return;
-  selectedMaterial=index;materialButtons.forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.material)===index)));
+  selectedMaterial=index;document.querySelector('#material-aspect').textContent=materialFacts[index][0];document.querySelector('#material-usage').textContent=materialFacts[index][1];materialButtons.forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.material)===index)));
   plane.classList.remove('is-changing');photo.src=src;photo.alt=m.alt;detail.src=src;range.value='0';range.setAttribute('aria-valuetext','Vue d’ensemble');plane.style.setProperty('--detail','0%');
   document.querySelector('#lab-tag').textContent=m.tag;document.querySelector('#lab-heading').textContent=m.heading;document.querySelector('#lab-description').textContent=m.text;document.querySelector('#sample-caption').textContent=m.caption;document.querySelector('#sample-counter').textContent=String(index+1).padStart(2,'0')+' / 04';
   if(!reduced()){void plane.offsetWidth;plane.classList.add('is-changing')}
