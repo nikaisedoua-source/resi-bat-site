@@ -98,14 +98,3 @@ if(labQuote)labQuote.addEventListener('click',()=>{
 
 menu.addEventListener('keydown',e=>{if(e.key==='Escape'){menu.open=false;menu.querySelector('summary').focus()}});
 document.addEventListener('click',e=>{if(menu.open&&!menu.contains(e.target))menu.open=false});
-
-// Turnstile callback
-window.onTurnstileSuccess = function(token) {
-  const btn = document.getElementById('quote-submit');
-  if (btn) {
-    btn.disabled = false;
-    btn.dataset.turnstile = token;
-  }
-};
-
-// RGPD banner already injected via inline script in HTML
