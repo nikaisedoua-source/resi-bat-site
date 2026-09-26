@@ -71,10 +71,11 @@
  }));
  const quoteForm=document.querySelector('#quote-form'),quoteService=document.querySelector('#service');
  const context=document.createElement('p');context.className='quote-context';context.hidden=true;quoteForm.querySelector('h3').after(context);
- function setInspiration(service,inspiration){
-  const option=[...quoteService.options].find(o=>o.value===service);if(option)quoteService.value=service;
-  quoteForm.dataset.inspiration=inspiration;context.replaceChildren();const text=document.createElement('span');text.textContent='Votre inspiration : '+inspiration;const clear=document.createElement('button');clear.type='button';clear.textContent='Retirer';clear.addEventListener('click',()=>{delete quoteForm.dataset.inspiration;context.hidden=true;document.querySelector('#quote-result').hidden=true});context.append(text,clear);context.hidden=false;document.querySelector('#quote-result').hidden=true;
- }
+  function setInspiration(service,inspiration){
+   const option=[...quoteService.options].find(o=>o.value===service);if(option)quoteService.value=service;
+   const detailsField=quoteForm.querySelector('#details');if(detailsField&&!detailsField.value.trim()){detailsField.value='Inspiration : '+inspiration+'\nDécrivez votre projet : ';if(typeof detailsField.setCustomValidity==='function')detailsField.setCustomValidity('')}
+   quoteForm.dataset.inspiration=inspiration;context.replaceChildren();const text=document.createElement('span');text.textContent='Votre inspiration : '+inspiration;const clear=document.createElement('button');clear.type='button';clear.textContent='Retirer';clear.addEventListener('click',()=>{delete quoteForm.dataset.inspiration;context.hidden=true;document.querySelector('#quote-result').hidden=true});context.append(text,clear);context.hidden=false;document.querySelector('#quote-result').hidden=true;
+  }
  document.querySelector('#lab-quote').addEventListener('click',()=>{const m=materials[selectedMaterial];setInspiration(m.name,m.name+' — '+m.caption)});
  document.querySelector('#gallery-enquiry').addEventListener('click',()=>{
   gallery.close();if(activeProject===null)return;const p=projects[activeProject];setInspiration(p.category==='Stucco'?'Stucco effet marbre':p.category,p.title+' — '+p.location);

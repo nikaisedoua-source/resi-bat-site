@@ -19,12 +19,13 @@ let galleryProject=null,galleryIndex=0;
 const galleryImage=document.querySelector('#gallery-image');
 const galleryError=document.querySelector('#gallery-error');
 const photoPath=n=>'assets/portfolio/resibat-'+String(n).padStart(3,'0')+'.jpg';
+const photoAlt=(p,i)=>'Chantier '+p.title+' — finition '+p.category+' — '+p.location+', Côte d’Ivoire — photo '+(i+1)+' sur '+p.photos.length;
 function showGalleryPhoto(index){
  if(!galleryProject)return;
  galleryIndex=(index+galleryProject.photos.length)%galleryProject.photos.length;
  galleryError.hidden=true;
  galleryImage.src=photoPath(galleryProject.photos[galleryIndex]);
- galleryImage.alt=galleryProject.title+' — vue '+(galleryIndex+1);
+  galleryImage.alt=photoAlt(galleryProject,galleryIndex);
  document.querySelector('#gallery-caption').textContent=galleryProject.title;
  document.querySelector('#gallery-counter').textContent=String(galleryIndex+1).padStart(2,'0')+' / '+String(galleryProject.photos.length).padStart(2,'0');
  document.querySelectorAll('[data-gallery-photo]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.galleryPhoto)===galleryIndex)));
@@ -41,7 +42,7 @@ document.querySelectorAll('[data-project]').forEach(b=>b.addEventListener('click
  p.photos.forEach((n,i)=>{
   const button=document.createElement('button'),image=document.createElement('img');
   button.type='button';button.dataset.galleryPhoto=String(i);button.setAttribute('aria-label','Afficher la photo '+(i+1)+' sur '+p.photos.length);
-  image.src=photoPath(n);image.alt='';image.loading='lazy';image.width=96;image.height=72;
+   image.src=photoPath(n);image.alt=photoAlt(p,i);image.loading='lazy';image.width=96;image.height=72;
   button.append(image);button.addEventListener('click',()=>showGalleryPhoto(i));photos.append(button);
  });
  showGalleryPhoto(0);dialog.showModal();dialog.scrollTop=0;
@@ -71,7 +72,28 @@ form.addEventListener('submit',e=>{
  if(!city||!details){const field=form.querySelector(!city?'#city':'#details');field.setCustomValidity(!city?'Indiquez la ville ou la commune du chantier.':'Décrivez votre projet en quelques mots.');field.reportValidity();return}
  const message='Bonjour RESI-BAT,'+(name?' je suis '+name+'.':'')+'\nJe souhaite un devis pour : '+data.get('service')+'.\nLieu : '+city+'.'+(data.get('place')?'\nType de lieu : '+data.get('place')+'.':'')+(data.get('surface')?'\nSurface approximative : '+data.get('surface')+' m².':'')+'\nMon projet : '+details+(form.dataset.inspiration?'\nInspiration : '+form.dataset.inspiration:'');
  document.querySelector('#quote-preview').textContent=message;
- document.querySelector('#quote-link').href='https://wa.me/2250749123888?text='+encodeURIComponent(message);result.hidden=false;
+  document.querySelector('#quote-link').href='https://wa.me/2250749123888?text='+encodeURIComponent(message);result.hidden=false;
+});
+const labQuote=document.querySelector('#lab-quote'),quoteService=document.querySelector('#service'),quoteDetails=document.querySelector('#details');
+function materialServiceName(label){return label==='Stucco'?'Stucco effet marbre':label}
+function ensureQuoteContext(){let context=form.querySelector('.quote-context');if(!context){context=document.createElement('p');context.className='quote-context';context.hidden=true;form.querySelector('h3').after(context)}return context}
+function setQuoteInspiration(service,inspiration){
+ const option=[...quoteService.options].find(o=>o.value===service);if(option)quoteService.value=service;
+ if(!quoteDetails.value.trim()){quoteDetails.value='Inspiration : '+inspiration+'\nDécrivez votre projet : ';if(typeof quoteDetails.setCustomValidity==='function')quoteDetails.setCustomValidity('')}
+ form.dataset.inspiration=inspiration;
+ const context=ensureQuoteContext();context.replaceChildren();
+ const text=document.createElement('span');text.textContent='Votre inspiration : '+inspiration;
+ const clear=document.createElement('button');clear.type='button';clear.textContent='Retirer';
+ clear.addEventListener('click',()=>{delete form.dataset.inspiration;context.hidden=true;result.hidden=true});
+ context.append(text,clear);context.hidden=false;result.hidden=true;
+}
+if(labQuote)labQuote.addEventListener('click',()=>{
+ const pressed=document.querySelector('[data-material][aria-pressed="true"] strong');
+ const label=pressed?pressed.textContent.trim():'';
+ const service=materialServiceName(label);
+ const caption=document.querySelector('#sample-caption');
+ const captionText=caption?caption.textContent.trim():'';
+ setQuoteInspiration(service,service+(captionText?' — '+captionText:''));
 });
 
 menu.addEventListener('keydown',e=>{if(e.key==='Escape'){menu.open=false;menu.querySelector('summary').focus()}});
