@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://nikaisedoua-source.github.io/resi-bat-site/sitemap.xml
